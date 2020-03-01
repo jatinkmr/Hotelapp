@@ -4,36 +4,14 @@ const { registerValidation, loginValidation } = require('../validation');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { notFound } = require("@hapi/boom");
+const { registration } = require('../actions/auth');
 
-router.post("/register", async (req, res) => {
-    const { error } = registerValidation(req.body);
-    if(error) {
-        return res.status(400).send(error.details[0].message);
-    }
-
-    const emailExist = await User.findOne({
-        email: req.body.email
-    });
-
-    if(emailExist) {
-        return res.status(400).send('Email already Exists !!');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-    const user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
-    });
-
-    try {
-        const savedUser = await user.save();
-        // res.send(savedUser);
-        res.send({user: user._id});
+router.post("/register", async (req, res, next) => {
+    try{
+        const response = await registration(req, res);
+        return res.send(JSON.stringify(response));
     } catch(err) {
-        res.status(400).send(err);
+        next(err);
     }
 });
 
@@ -63,7 +41,6 @@ router.post('/login', async (req, res) => {
 });
 
 router.all("*", (req, res, next) => {
-    // res.status(400).send("No Such Route");
     next(notFound());
 });
 
