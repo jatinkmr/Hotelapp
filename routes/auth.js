@@ -3,6 +3,7 @@ const User = require('../model/User');
 const { registerValidation, loginValidation } = require('../validation');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { notFound } = require("@hapi/boom");
 
 router.post("/register", async (req, res) => {
     const { error } = registerValidation(req.body);
@@ -59,6 +60,11 @@ router.post('/login', async (req, res) => {
         _id: user._id
     }, process.env.TOKEN_SECRET);
     res.header('auth-token', token).send(token);
+});
+
+router.all("*", (req, res, next) => {
+    // res.status(400).send("No Such Route");
+    next(notFound());
 });
 
 module.exports = router;
