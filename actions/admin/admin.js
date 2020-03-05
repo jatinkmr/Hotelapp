@@ -1,7 +1,8 @@
 const User = require('../../model/User');
 const Admin = require('../../model/admin');
-const { registerValidation } = require('../../validation');
+const { registerValidation, loginValidation } = require('../../validation');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const getAllUsers = async (req, res) => {
     const user = await User.find({});
@@ -11,6 +12,33 @@ const getAllUsers = async (req, res) => {
     }
 
     return res.status(200).send(user);
+};
+
+const login = async (req, res) => {
+    const { error } = loginValidation(req.body);
+    if(error) {
+        return res.status(400).send(error.details[0].message);
+    }
+        
+    const admin = await Admin.findOne({
+        email: req.body.email
+    });
+
+    if(!admin) {
+        return res.status(400).send('Email Does Not Exists !!');
+    }
+
+    const validPass = await bcrypt.compare(req.body.password, admin.password);
+    if(!validPass) {
+        return res.status(400).send('Invalid Password !!');
+    }
+
+    const token = jwt.sign({
+        _id: admin._id
+    }, process.env.ADMIN_TOKEN_SECRET, {
+        expiresIn: process.env.TOKEN_EXPIRY
+    });
+    res.header('auth-token', token).send(token);
 };
 
 const registration = async (req, res) => {
@@ -48,3 +76,4 @@ const registration = async (req, res) => {
 
 module.exports.getAllUsers = getAllUsers;
 module.exports.registration = registration;
+module.exports.login = login;
