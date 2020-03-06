@@ -7,29 +7,43 @@ const jwt = require('jsonwebtoken');
 const getAllUsers = async (req, res) => {
     const user = await User.find({});
 
-    if(!user) {
+    if (!user) {
         return res.send(200).send('No User Available !!');
     }
 
     return res.status(200).send(user);
 };
 
+const getUsername = async (req, res) => {
+    const userName = req.params.username;
+    console.log('userName => ', userName);
+    const user = await User.findOne({
+        name: userName
+    });
+
+    if (!user) {
+        return res.status(400).send('UserName Does Not Exists !!');
+    }
+
+    return res.status(200).send('UserName Exists !!');
+};
+
 const login = async (req, res) => {
     const { error } = loginValidation(req.body);
-    if(error) {
+    if (error) {
         return res.status(400).send(error.details[0].message);
     }
-        
+
     const admin = await Admin.findOne({
         email: req.body.email
     });
 
-    if(!admin) {
+    if (!admin) {
         return res.status(400).send('Email Does Not Exists !!');
     }
 
     const validPass = await bcrypt.compare(req.body.password, admin.password);
-    if(!validPass) {
+    if (!validPass) {
         return res.status(400).send('Invalid Password !!');
     }
 
@@ -43,7 +57,7 @@ const login = async (req, res) => {
 
 const registration = async (req, res) => {
     const { error } = registerValidation(req.body);
-    if(error) {
+    if (error) {
         return res.status(400).send(error.details[0].message);
     }
 
@@ -51,7 +65,7 @@ const registration = async (req, res) => {
         email: req.body.email
     });
 
-    if(emailExist) {
+    if (emailExist) {
         return res.status(400).send('Email already Exists !!');
     }
 
@@ -67,13 +81,16 @@ const registration = async (req, res) => {
     try {
         const savedAdmin = await admin.save();
         // return res.send(savedAdmin);
-        return res.send({Admin: admin._id});
-    } catch(err) {
+        return res.send({ Admin: admin._id });
+    } catch (err) {
         console.log(err);
         return res.status(400).send(err);
     }
 };
 
-module.exports.getAllUsers = getAllUsers;
-module.exports.registration = registration;
-module.exports.login = login;
+module.exports = {
+    getAllUsers,
+    registration,
+    login,
+    getUsername
+};

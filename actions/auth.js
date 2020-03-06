@@ -62,5 +62,7 @@ const login = async (req, res) => {
     res.header('auth-token', token).send(token);
 };
 
-module.exports.registration = registration;
-module.exports.login = login;
+module.exports = {
+    registration,
+    login
+};
