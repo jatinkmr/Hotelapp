@@ -25,7 +25,7 @@ const getUsername = async (req, res) => {
         return res.status(400).send('UserName Does Not Exists !!');
     }
 
-    return res.status(200).send('UserName Exists !!');
+    return res.status(200).send('UserName Exists !!' + user);
 };
 
 const login = async (req, res) => {
