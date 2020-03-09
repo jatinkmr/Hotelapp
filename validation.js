@@ -17,5 +17,15 @@ const loginValidation = data => {
     return Joi.validate(data, schema);
 };
 
+const hotelValidation = data => {
+    const schema = Joi.object().keys({
+        hotelName: Joi.string().min(8).required(),
+        hotelRating: Joi.number().min(0).max(5).required(),
+        location: Joi.string().min(5).max(50).required()
+    });
+    return Joi.validate(data, schema);
+};
+
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
+module.exports.hotelValidation = hotelValidation;
