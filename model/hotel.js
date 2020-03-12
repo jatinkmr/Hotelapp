@@ -5,9 +5,12 @@ const hotelSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    ownerID: {
+        type: Number,
+        required: true
+    },
     ownerName: {
         type: String,
-        ref: 'User',
         required: true
     },
     hotelRating: {
