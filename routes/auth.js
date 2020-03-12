@@ -25,7 +25,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/addhotel', verify, async (req, res, next) => {
     try {
         const response = await addHotel(req, res);
-        return  res.json(JSON.stringify(response));
+        return  response;
     } catch(err) {
         next(err);
     }
