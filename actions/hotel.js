@@ -48,7 +48,7 @@ const addHotel = async (req, res) => {
                     // return res.json({message: "Welcome Owner !!"});
                 } else {
                     // console.log('You are not an Owner !!');
-                    return res.json(Boom.unauthorized('UnAuthorized User to Create Hotel').output.payload.message);
+                    return res.json(Boom.unauthorized('UnAuthorized User to Create Hotel!! You are Customer !!').output.payload.message);
                 }
             }).catch(err => {
                 // console.log('Error => ', err);
@@ -87,11 +87,19 @@ const deleteHotel = (req, res) => {
             var userId = decoded._id;
             var hotelId = req.params.hotelID;
             // return res.json({'UserID': userId, 'HotelID': hotelId});
-            Hotel.findByIdAndDelete({ _id: hotelId }, {ownerID: userId}, (err, data) => {
-                if(err) {
-                    return res.json(Boom.notFound('Hotel Not Found').output.payload.message);
+
+            User.find({ _id: userId }).then(user => {
+                if (user[0].role.toLowerCase() == 'hotelowner') {
+                    Hotel.findByIdAndDelete({ _id: hotelId }, {ownerID: userId}, (err, data) => {
+                        if(err) {
+                            return res.json(Boom.notFound('Hotel Not Found').output.payload.message);
+                        } else {
+                            return res.json({message: 'Hotel Deleted Successfully !!'});
+                        }
+                    });
                 } else {
-                    return res.json({message: 'Hotel Deleted Successfully !!'});
+                    // console.log('You are not an Owner !!');
+                    return res.json(Boom.unauthorized('UnAuthorized User to Delete Hotel !! You are a Customer !!').output.payload.message);
                 }
             });
         } catch (err) {
