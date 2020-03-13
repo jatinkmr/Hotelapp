@@ -86,7 +86,6 @@ const deleteHotel = (req, res) => {
             const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
             var userId = decoded._id;
             var hotelId = req.params.hotelID;
-
             // return res.json({'UserID': userId, 'HotelID': hotelId});
             Hotel.findByIdAndDelete({ _id: hotelId }, {ownerID: userId}, (err, data) => {
                 if(err) {
