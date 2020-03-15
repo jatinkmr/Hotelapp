@@ -165,8 +165,23 @@ const editHotel = async (req, res) => {
     return res.status(500);
 };
 
+const hotelList = async (req, res) => {
+    try {
+        Hotel.find({}).then(hotel => {
+            // console.log(hotel);
+            if(!hotel) {
+                return res.json(Boom.notFound('No Hotel Found').output.payload.message);
+            }
+            return res.json(hotel);
+        });
+    }catch (err) {
+        return res.json(Boom.notFound('No Hotel Found').output.payload.message);
+    }
+};
+
 module.exports = {
     addHotel,
     deleteHotel,
-    editHotel
+    editHotel,
+    hotelList
 };
