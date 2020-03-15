@@ -78,7 +78,7 @@ const deleteHotel = (req, res) => {
         const token = req.header('auth-token');
 
         if (!token) {
-            console.log('Nope');
+            // console.log('Nope');
             return res.json(Boom.unauthorized('Unauthorized'));
         }
 
@@ -90,11 +90,11 @@ const deleteHotel = (req, res) => {
 
             User.find({ _id: userId }).then(user => {
                 if (user[0].role.toLowerCase() == 'hotelowner') {
-                    Hotel.findByIdAndDelete({ _id: hotelId }, {ownerID: userId}, (err, data) => {
-                        if(err) {
+                    Hotel.findByIdAndDelete({ _id: hotelId }, { ownerID: userId }, (err, data) => {
+                        if (err) {
                             return res.json(Boom.notFound('Hotel Not Found').output.payload.message);
                         } else {
-                            return res.json({message: 'Hotel Deleted Successfully !!'});
+                            return res.json({ message: 'Hotel Deleted Successfully !!' });
                         }
                     });
                 } else {
@@ -103,12 +103,70 @@ const deleteHotel = (req, res) => {
                 }
             });
         } catch (err) {
-            console.log('Error');
+            // console.log('Error');
             return res.json(Boom.unauthorized('Unauthorized'));
         }
     }
     return res.status(500);
 };
 
-module.exports.addHotel = addHotel;
-module.exports.deleteHotel = deleteHotel;
+const editHotel = async (req, res) => {
+    const { error } = hotelValidation(req.body);
+    if (error) {
+        return res.status(400).send(error.details[0].message);
+    }
+
+    if (req.headers) {
+        const token = req.header('auth-token');
+        // console.log('token => ', token);
+        if (!token) {
+            // console.log('Nope');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            // console.log('Decoded => ', decoded);
+            var userId = decoded._id;
+            // console.log("UserID => ", userId);
+            var hotelId = req.params.hotelID;
+
+            User.find({ _id: userId }).then(user => {
+                // console.log('user => ', user);
+                // console.log(user[0].role);
+                if (user[0].role.toLowerCase() == 'hotelowner') {
+                    // console.log('Welcome !!');
+                    Hotel.findByIdAndUpdate({ _id: hotelId }, {
+                        $set: {
+                            hotelName: req.body.hotelName,
+                            hotelRating: req.body.hotelRating,
+                            location: req.body.location
+                        }
+                    }, { returnNewDocument: true }, (err, result) => {
+                        if(err) {
+                            // console.log('Error => ', err);
+                            return res.json(Boom.notFound('Hotel Not Found').output.payload.message);
+                        }
+                        // console.log('REsult => ', result);
+                        return res.json({message: 'Hotel Updated Successfully !!'});
+                    });
+                } else {
+                    // console.log('You are not an Owner !!');
+                    return res.json(Boom.unauthorized('UnAuthorized User to Update Hotel!! You are Customer !!').output.payload.message);
+                }
+            }).catch(err => {
+                return res.json(Boom.notFound('User Not Found').output.payload.message);
+            });
+        } catch (err) {
+            // console.log('Error');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+    }
+    return res.status(500);
+};
+
+module.exports = {
+    addHotel,
+    deleteHotel,
+    editHotel
+};
