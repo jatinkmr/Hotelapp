@@ -35,7 +35,8 @@ const roomValidation = data => {
         hotelId: Joi.string().min(10).max(255).required(),
         floorNumber: Joi.number().min(0).max(10).required(),
         typeOfBed: Joi.string().max(255).required(),
-        fullyFurnished: Joi.boolean().required()
+        fullyFurnished: Joi.boolean().required(),
+        booked: Joi.boolean().required()
     });
     return Joi.validate(data, schema);
 };

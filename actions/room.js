@@ -37,7 +37,8 @@ const addRoom = async (req, res) => {
                         hotelId: req.body.hotelId,
                         floorNumber: req.body.floorNumber,
                         typeOfBed: req.body.typeOfBed,
-                        fullyFurnished: req.body.fullyFurnished
+                        fullyFurnished: req.body.fullyFurnished,
+                        booked: req.body.booked
                     });
 
                     Hotel.find({ _id: room.hotelId }).then(hotel => {

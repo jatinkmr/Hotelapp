@@ -36,6 +36,10 @@ const roomSchema = new mongoose.Schema({
     fullyFurnished: {
         type: Boolean,
         required: true
+    },
+    booked: {
+        type: Boolean,
+        required: true
     }
 });
 
