@@ -178,7 +178,8 @@ const editRoom = async (req, res, next) => {
                                             hotelId: req.body.hotelId,
                                             floorNumber: req.body.floorNumber,
                                             typeOfBed: req.body.typeOfBed,
-                                            fullyFurnished: req.body.fullyFurnished
+                                            fullyFurnished: req.body.fullyFurnished,
+                                            booked: req.body.booked
                                         }
                                     }, { returnNewDocument: true }, (err, result) => {
                                         if (err) {
