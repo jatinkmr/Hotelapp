@@ -40,9 +40,9 @@ const addRoom = async (req, res) => {
                         fullyFurnished: req.body.fullyFurnished
                     });
 
-                    Hotel.find({_id: room.hotelId}).then(hotel => {
+                    Hotel.find({ _id: room.hotelId }).then(hotel => {
                         // console.log('hotel =>', hotel);
-                        if(hotel.length > 0) {
+                        if (hotel.length > 0) {
                             // console.log('hotel => ', hotel);
                             try {
                                 const savedRoom = room.save();
@@ -51,7 +51,7 @@ const addRoom = async (req, res) => {
                                 return res.send(Boom.badRequest('Unable to Save Room'));
                             }
                         } else {
-                            return res.json({message: "Hotel Not Found"});
+                            return res.json({ message: "Hotel Not Found" });
                         }
                     }).catch(err => {
                         return res.json(Boom.notFound('Hotel Not Found !!'));
@@ -63,8 +63,8 @@ const addRoom = async (req, res) => {
             }).catch(err => {
                 return res.json(Boom.notFound());
             });
-        } catch(err) {
-            return res.json({message: err});
+        } catch (err) {
+            return res.json({ message: err });
         }
     }
     return res.status(500);
@@ -85,25 +85,25 @@ const deleteRoom = async (req, res) => {
             var userId = decoded._id;
             var roomId = req.params.roomId;
 
-            User.findOne({_id: userId}).then(user => {
+            User.findOne({ _id: userId }).then(user => {
                 // console.log('User => ', user);
                 if (user.role.toLowerCase() == 'hotelowner') {
                     // console.log('HotelOwner')
-                    Room.findOne({_id: roomId}).then(rooms => {
+                    Room.findOne({ _id: roomId }).then(rooms => {
                         // console.log('Room =>', rooms);
                         let hotelID = rooms.hotelId;
                         // console.log('HotelID => ', hotelID);
-        
-                        Hotel.findOne({_id: hotelID}).then(hotels => {
+
+                        Hotel.findOne({ _id: hotelID }).then(hotels => {
                             // console.log('hotels =>', hotels);
                             // console.log(hotels.ownerID);
                             // console.log(userId);
-                            if(hotels.ownerID === userId) {
+                            if (hotels.ownerID === userId) {
                                 Room.findByIdAndDelete({ _id: roomId }, { ownerID: userId }, (err, data) => {
-                                    if(err) {
+                                    if (err) {
                                         return res.json(Boom.notFound('Room not Available').output.payload.message);
                                     } else {
-                                        return res.json({message: "Room Deleted Successfully !!"});
+                                        return res.json({ message: "Room Deleted Successfully !!" });
                                     }
                                 })
                             } else {
@@ -120,7 +120,7 @@ const deleteRoom = async (req, res) => {
                     return res.json(Boom.unauthorized('UnAuthorized User to Delete Room!! You are Customer !!').output.payload.message);
                 }
             }).catch(err => {
-                return res.json(Boom.notFound().output.payload.message);
+                return res.json(Boom.notFound('User Not Found !!').output.payload.message);
             });
 
         } catch (err) {
@@ -131,7 +131,77 @@ const deleteRoom = async (req, res) => {
     return res.status(500);
 };
 
+const editRoom = async (req, res, next) => {
+
+    if (req.headers) {
+        const token = req.header('auth-token');
+
+        if (!token) {
+            // console.log('Nope');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            var userId = decoded._id;
+            var roomId = req.params.roomId;
+
+            User.findOne({ _id: userId }).then(user => {
+                // console.log('User => ', user);
+                if (user.role.toLowerCase() == 'hotelowner') {
+                    // console.log('HotelOwner');
+                    Room.findOne({ _id: roomId }).then(rooms => {
+                        // console.log('Room => ', room);
+                        var hotelID = rooms.hotelId;
+                        // console.log('HotelID => ', hotelID);
+                        var newHotelID = req.body.hotelId;
+
+                        Hotel.findOne({ _id: newHotelID }).then(sHotel => {
+                            // console.log('hotel => ', sHotel);
+                            Hotel.findOne({ _id: hotelID }).then(hotels => {
+                                if (hotels.ownerID === userId) {
+                                    Room.findByIdAndUpdate({ _id: roomId }, {
+                                        $set: {
+                                            roomType: req.body.roomType,
+                                            price: req.body.price,
+                                            hotelId: req.body.hotelId,
+                                            floorNumber: req.body.floorNumber,
+                                            typeOfBed: req.body.typeOfBed,
+                                            fullyFurnished: req.body.fullyFurnished
+                                        }
+                                    }, { returnNewDocument: true }, (err, result) => {
+                                        if (err) {
+                                            return res.json(Boom.notFound('Room not Available').output.payload.message);
+                                        }
+                                        return res.json({ message: 'Room Updated Successfully !!' });
+                                    })
+                                } else {
+                                    return res.json(Boom.unauthorized('You are not owner of this Room').output.payload.message);
+                                }
+                            });
+                        }).catch(err => {
+                            return res.json(Boom.notFound('New Hotel Not Found !! ').output.payload.message);
+                        });
+
+                    }).catch(err => {
+                        return res.json(Boom.notFound('Room Not Found !!').output.payload.message);
+                    });
+                } else {
+                    // console.log('Customer');
+                    return res.json(Boom.unauthorized('You are not Authorized to Edit Room !! You are Customer !!'));
+                }
+            }).catch(err => {
+                return res.json(Boom.notFound('User Not Found !!').output.payload.message);
+            });
+        } catch (err) {
+            res.json(Boom.unauthorized('UnAuthorized'));
+        }
+    }
+    return res.status(500);
+};
+
 module.exports = {
     addRoom,
-    deleteRoom
+    deleteRoom,
+    editRoom
 };
