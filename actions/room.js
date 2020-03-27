@@ -94,6 +94,11 @@ const deleteRoom = async (req, res) => {
                         // console.log('Room =>', rooms);
                         let hotelID = rooms.hotelId;
                         // console.log('HotelID => ', hotelID);
+                        // console.log('Booked => ', rooms.booked);
+                        if(rooms.booked == true) {
+                            // console.log('Not happening');
+                            return res.json(Boom.unauthorized('Cannot Be Deleted Due To Booking').output.payload.message);
+                        }
 
                         Hotel.findOne({ _id: hotelID }).then(hotels => {
                             // console.log('hotels =>', hotels);
@@ -156,6 +161,11 @@ const editRoom = async (req, res, next) => {
                         var hotelID = rooms.hotelId;
                         // console.log('HotelID => ', hotelID);
                         var newHotelID = req.body.hotelId;
+
+                        if(rooms.booked == true) {
+                            // console.log('Not happening');
+                            return res.json(Boom.unauthorized('Cannot Be Modified Due To Booking').output.payload.message);
+                        }                        
 
                         Hotel.findOne({ _id: newHotelID }).then(sHotel => {
                             // console.log('hotel => ', sHotel);
