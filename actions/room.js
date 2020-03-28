@@ -212,8 +212,46 @@ const editRoom = async (req, res, next) => {
     return res.status(500);
 };
 
+const findRoom = async (req, res, next) => {
+
+    if (req.headers) {
+        const token = req.header('auth-token');
+
+        if (!token) {
+            // console.log('Nope');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            var userId = decoded._id;
+            var hotelId = req.params.hotelId;
+
+            User.findOne({ _id: userId }).then(user => {
+                // console.log('User => ', user);
+                // console.log('Hotel =>', hotelId);
+                Hotel.findOne({_id: hotelId}).then(hotels => {
+                    // console.log('hotels =>', hotels);
+                    Room.findOne({'booked': false, 'hotelId': hotelId}).then(rooms => {
+                        // console.log('Rooms => ', rooms);
+                        return res.json({message: "Available Rooms", data: rooms});
+                    })
+                }).catch(err => {
+                    return res.json(Boom.notFound('Hotel Not Found !!').output.payload.message);
+                })
+            }).catch(err => {
+                return res.json(Boom.notFound('User Not Found !!').output.payload.message);
+            });
+        } catch(error) {
+            res.json(Boom.unauthorized('UnAuthorized'));
+        }
+    }
+    return res.status(500);
+};
+
 module.exports = {
     addRoom,
     deleteRoom,
-    editRoom
+    editRoom,
+    findRoom
 };

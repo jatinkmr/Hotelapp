@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { notFound } = require("@hapi/boom");
 const { registration, login } = require('../actions/auth');
 const { addHotel, deleteHotel, editHotel, hotelList } = require('../actions/hotel');
-const { addRoom, deleteRoom, editRoom} = require('../actions/room');
+const { addRoom, deleteRoom, editRoom, findRoom} = require('../actions/room');
 const verify = require('./verifyToken');
 
 router.post("/register", async (req, res, next) => {
@@ -85,6 +85,15 @@ router.put('/editRoom/:roomId', verify, async (req, res, next) => {
         next(err);
     }
 });
+
+router.get('/:hotelId/rooms', verify, async (req, res, next) => {
+    try {
+        const response = await findRoom(req, res);
+        return response;
+    } catch(err) {
+        next(err);
+    }
+})
 
 router.all("*", (req, res, next) => {
     next(notFound());
