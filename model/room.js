@@ -40,6 +40,10 @@ const roomSchema = new mongoose.Schema({
     booked: {
         type: Boolean,
         required: true
+    },
+    creationDate: {
+        type: Date,
+        default: Date.now
     }
 });
 

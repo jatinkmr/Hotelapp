@@ -22,6 +22,10 @@ const hotelSchema = new mongoose.Schema({
     location: {
         type: String,
         required: true
+    },
+    creationDate: {
+        type: Date,
+        default: Date.now
     }
 });
 
