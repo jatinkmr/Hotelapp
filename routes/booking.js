@@ -1,8 +1,10 @@
 const router = require('express').Router();
+const { notFound } = require("@hapi/boom");
+
 const verify = require('./verifyToken');
 
-router.get('/', verify, (req, res) => {
-    res.json({posts: {title: 'myFirstPost', description: 'Some Random Cool Stuff !!'}});
+router.post('/', verify, (req, res, next) => {
+    return res.status(200).send('Welcome to Booking Area !!');
 });
 
 router.all("*", (req, res, next) => {
