@@ -1,0 +1,37 @@
+const User = require('../model/User');
+const Boom = require('@hapi/boom');
+const jwt = require('jsonwebtoken');
+
+const bookingHome = async (req, res, next) => {
+
+    if(req.headers) {
+        const token = req.header('auth-token');
+        // console.log('token => ', token);
+        if (!token) {
+            // console.log('Nope');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            // console.log('Decoded => ', decoded);
+            var userId = decoded._id;
+            // console.log("UserID => ", userId);
+
+            User.findOne({_id: userId}).then(users => {
+                console.log('User => ', users);
+            }).catch(err => {
+                console.log('Error =>', err);
+                return res.json(Boom.notFound('User Not Found !!').output.payload.message);
+            })
+        }catch(err) {
+            // console.log('Error');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+    }
+    return res.status(500);
+};
+
+module.exports = {
+    bookingHome
+};

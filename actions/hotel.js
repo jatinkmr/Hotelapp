@@ -52,7 +52,7 @@ const addHotel = async (req, res) => {
                 }
             }).catch(err => {
                 // console.log('Error => ', err);
-                return res.json(Boom.notFound());
+                return res.json(Boom.notFound('Owner Not Found !!').output.payload.message);
             });
 
             // const hotel = new Hotel({
@@ -101,6 +101,9 @@ const deleteHotel = (req, res) => {
                     // console.log('You are not an Owner !!');
                     return res.json(Boom.unauthorized('UnAuthorized User to Delete Hotel !! You are a Customer !!').output.payload.message);
                 }
+            }).catch(err => {
+                // console.log('Error => ', err);
+                return res.json(Boom.notFound('Owner Not Found !!').output.payload.message);
             });
         } catch (err) {
             // console.log('Error');
