@@ -1,5 +1,7 @@
 const User = require('../model/User');
+const Booking = require('../model/booking');
 const Hotel = require('../model/hotel');
+const Room = require('../model/room');
 const Boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
 
@@ -20,7 +22,7 @@ const bookingHome = async (req, res, next) => {
             // console.log("UserID => ", userId);
 
             User.findOne({_id: userId}).then(users => {
-                console.log('User => ', users);
+                // console.log('User => ', users);
                 if (users.role.toLowerCase() == 'hotelowner') {
                     // console.log('You are HotelOwner !!');
 
@@ -48,6 +50,77 @@ const bookingHome = async (req, res, next) => {
     return res.status(500);
 };
 
+const roomBooking = (req, res, next) => {
+
+    if(req.headers) {
+
+        const token = req.header('auth-token');
+        // console.log('token => ', token);
+        if (!token) {
+            // console.log('Nope');
+            return res.json(Boom.unauthorized('Unauthorized'));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+            // console.log('Decoded => ', decoded);
+            var userId = decoded._id;
+            // console.log("UserID => ", userId);
+            var hotelId = req.params.hotelId;
+            var roomId = req.params.roomId;
+
+            const booking = new Booking({
+                fromBookingDate: new Date(req.body.fromBookingDate),
+                toBookingDate: new Date(req.body.toBookingDate),
+                noOfPeople: req.body.noOfPeople,
+                bringVerificationDocumentType: req.body.bringVerificationDocumentType,
+                modeOfPayment: req.body.modeOfPayment,
+                paymentCompleted: req.body.paymentCompleted
+            });
+
+            booking.userId = userId;
+            booking.hotelId = hotelId;
+            booking.roomId = roomId;
+
+            Room.findOne({_id: roomId}).then(room => {
+                // console.log('Room => ', room.booked);
+                if(room.booked === true) {
+                    return res.json({error: false, message: 'Room Already Booked !!'});
+                } else {
+                    // return res.json({error: false, message: 'Room Available'});
+                    User.findOne({_id: userId}).then(user => {
+                        if (user.role.toLowerCase() == 'hotelowner') {
+                            // console.log('HotelOwner');
+                            booking.bookedBy = "Hotel Owner";
+                            console.log('Entered Data => ', booking);
+                        } else {
+                            // console.log('Customer');
+                            booking.bookedBy = "Customer";
+                            // console.log('Entered Data => ', booking);
+                        }
+
+                        try {
+                            const savedBooking = booking.save();
+                            return res.json({ id: booking._id, message: 'Booking Confirmed !!' });
+                        } catch(err) {
+                            return res.send(Boom.badRequest('Unable to Save Booking !!'));
+                        }
+                    }).catch(err => {
+                        // console.log('Error => ', err);
+                        return res.json(Boom.notFound('User Not Found !! ').output.payload.message);
+                    });
+                }
+            }).catch(err => {
+                return res.json(Boom.notFound('Room not Found').output.payload.message);
+            });
+        } catch(err) {
+            return res.json(Boom.unauthorized('UnAuthorized').output.payload.message);
+        }
+    }
+    return res.status(500);
+};
+
 module.exports = {
-    bookingHome
+    bookingHome,
+    roomBooking
 };

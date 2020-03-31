@@ -5,10 +5,6 @@ const User = require('./User');
 const Schema = mongoose.Schema;
 
 const bookingSchema = new Schema({
-    bookingDate: {
-        type: Date,
-        required: true
-    },
     roomId: {
         type: Schema.Types.ObjectId,
         ref: Room,
@@ -34,7 +30,7 @@ const bookingSchema = new Schema({
     },
     bookingDate: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     },
     noOfPeople: {
         type: Number,
@@ -46,6 +42,14 @@ const bookingSchema = new Schema({
     },
     modeOfPayment: {
         type: String,
+        required: true
+    },
+    bookedBy: {
+        type: String,
+        required: true
+    },
+    paymentCompleted: {
+        type: Boolean,
         required: true
     }
 });
