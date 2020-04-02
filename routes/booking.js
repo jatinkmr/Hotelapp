@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { notFound } = require("@hapi/boom");
+const Boom = require('@hapi/boom');
 const { bookingHome, roomBooking } = require('../actions/booking');
 
 const verify = require('./verifyToken');
@@ -23,7 +23,7 @@ router.post('/:hotelId/book/:roomId', verify, async (req, res, next) => {
 });
 
 router.all("*", (req, res, next) => {
-    next(notFound());
+    res.json(Boom.notFound('Path Not Available').output.payload.message);
 });
 
 module.exports = router;

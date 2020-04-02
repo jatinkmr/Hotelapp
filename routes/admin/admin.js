@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { notFound } = require("@hapi/boom");
+const Boom = require('@hapi/boom');
 const { getUsername, getAllUsers, registration, login } = require('../../actions/admin/admin');
 const verify = require('./verifyToken');
 
@@ -45,7 +45,7 @@ router.get('/user/:username', verify, async (req, res, next) => {
 });
 
 router.all("*", (req, res, next) => {
-    next(notFound());
+    res.json(Boom.notFound('Path Not Available').output.payload.message);
 });
 
 module.exports = router;

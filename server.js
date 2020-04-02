@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const routes = require('./routes');
 const bodyParser = require('body-parser');
+const Boom = require('@hapi/boom');
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.use(express.json());
 app.use('/api', routes);
 
 app.all("*", (req, res, next) => {
-    next(notFound());
+    res.json(Boom.notFound('Path Not Available').output.payload.message);
 });
 
 app.listen(process.env.PORT, () => {
