@@ -50,7 +50,7 @@ const bookingHome = async (req, res, next) => {
     return res.status(500);
 };
 
-const roomBooking = (req, res, next) => {
+const roomBooking = async (req, res, next) => {
 
     if(req.headers) {
 
@@ -69,7 +69,7 @@ const roomBooking = (req, res, next) => {
             var hotelId = req.params.hotelId;
             var roomId = req.params.roomId;
 
-            const booking = new Booking({
+            var booking = new Booking({
                 fromBookingDate: new Date(req.body.fromBookingDate),
                 toBookingDate: new Date(req.body.toBookingDate),
                 noOfPeople: req.body.noOfPeople,
@@ -83,32 +83,52 @@ const roomBooking = (req, res, next) => {
             booking.roomId = roomId;
 
             Room.findOne({_id: roomId}).then(room => {
-                // console.log('Room => ', room.booked);
+                // console.log('Room => ', room);
                 if(room.booked === true) {
                     return res.json({error: false, message: 'Room Already Booked !!'});
                 } else {
-                    // return res.json({error: false, message: 'Room Available'});
-                    User.findOne({_id: userId}).then(user => {
-                        if (user.role.toLowerCase() == 'hotelowner') {
-                            // console.log('HotelOwner');
-                            booking.bookedBy = "Hotel Owner";
-                            console.log('Entered Data => ', booking);
-                        } else {
-                            // console.log('Customer');
-                            booking.bookedBy = "Customer";
-                            // console.log('Entered Data => ', booking);
-                        }
+                    // console.log('HotelId => ', hotelId);
+                    // console.log('Room HotelId => ', room.hotelId);
+                    if(room.hotelId == hotelId) {
+                        // console.log('HotelId is Same');
+                        // return res.json({error: false, message: 'Room Available'});
+                        Room.findByIdAndUpdate({_id: roomId}, {
+                            $set: {
+                                booked: "true"
+                            }
+                        }, (err, result) => {
+                            if(err) {
+                                console.log('Not Updated !');
+                            } else {
+                                console.log('Updated !');
+                            }
+                        });
+                        // console.log('Room after True => ', room);
+                        User.findOne({_id: userId}).then(user => {
+                            if (user.role.toLowerCase() == 'hotelowner') {
+                                // console.log('HotelOwner');
+                                booking.bookedBy = "Hotel Owner";
+                                console.log('Entered Data => ', booking);
+                            } else {
+                                // console.log('Customer');
+                                booking.bookedBy = "Customer";
+                                // console.log('Entered Data => ', booking);
+                            }
 
-                        try {
-                            const savedBooking = booking.save();
-                            return res.json({ id: booking._id, message: 'Booking Confirmed !!' });
-                        } catch(err) {
-                            return res.send(Boom.badRequest('Unable to Save Booking !!'));
-                        }
-                    }).catch(err => {
-                        // console.log('Error => ', err);
-                        return res.json(Boom.notFound('User Not Found !! ').output.payload.message);
-                    });
+                            try {
+                                const savedBooking = booking.save();
+                                return res.json({ id: booking._id, message: 'Booking Confirmed !!' });
+                            } catch(err) {
+                                return res.send(Boom.badRequest('Unable to Save Booking !!'));
+                            }
+                        }).catch(err => {
+                            // console.log('Error => ', err);
+                            return res.json(Boom.notFound('User Not Found !! ').output.payload.message);
+                        });
+                    } else {
+                        // console.log('HotelId is Different');
+                        return res.json({error: false, message: 'HotelId of Room is Different !!'});
+                    }
                 }
             }).catch(err => {
                 return res.json(Boom.notFound('Room not Found').output.payload.message);
