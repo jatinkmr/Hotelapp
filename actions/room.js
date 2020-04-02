@@ -24,6 +24,7 @@ const addRoom = async (req, res) => {
             // console.log('Decoded => ', decoded);
             var userId = decoded._id;
             // console.log("UserID => ", userId);
+            var hotelId = req.params.hotelId
 
             User.find({ _id: userId }).then(user => {
                 // console.log('user => ', user);
@@ -34,7 +35,7 @@ const addRoom = async (req, res) => {
                         room_No: req.body.room_No,
                         roomType: req.body.roomType,
                         price: req.body.price,
-                        hotelId: req.body.hotelId,
+                        hotelId: hotelId,
                         floorNumber: req.body.floorNumber,
                         typeOfBed: req.body.typeOfBed,
                         fullyFurnished: req.body.fullyFurnished,

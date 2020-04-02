@@ -59,7 +59,7 @@ router.get('/hotels', async (req, res, next) => {
     }
 });
 
-router.post('/room', verify, async (req, res, next) => {
+router.post('/:hotelId/room', verify, async (req, res, next) => {
     try {
         const response = await addRoom(req, res);
         return response;

@@ -20,7 +20,7 @@ router.post('/:hotelId/book/:roomId', verify, async (req, res, next) => {
     } catch(err) {
         next(err);
     }
-})
+});
 
 router.all("*", (req, res, next) => {
     next(notFound());

@@ -19,6 +19,10 @@ const adminSchema = new mongoose.Schema({
         max: 1024,
         min: 6
     },
+    role: {
+        type: String,
+        required: true
+    },
     date: {
         type: Date,
         default: Date.now

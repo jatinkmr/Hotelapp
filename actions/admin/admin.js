@@ -75,7 +75,8 @@ const registration = async (req, res) => {
     const admin = new Admin({
         name: req.body.name,
         email: req.body.email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: req.body.role
     });
 
     try {
