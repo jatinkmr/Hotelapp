@@ -140,7 +140,17 @@ const roomBooking = async (req, res, next) => {
     return res.status(500);
 };
 
+const getVacantRoom = async (req, res, next) => {
+
+    Room.find({booked: false}).then(rooms => {
+        return res.json(rooms);
+    }).catch(err => {
+        return res.json(Boom.notFound('No Vacant Room Available !!').output.payload.message);
+    })
+};
+
 module.exports = {
     bookingHome,
-    roomBooking
+    roomBooking,
+    getVacantRoom
 };
